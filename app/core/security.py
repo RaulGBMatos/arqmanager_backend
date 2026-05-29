@@ -4,15 +4,33 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from .config import settings
 
+import bcrypt
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-
+'''
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
+'''
+
+# Funções de hash usando bcrypt
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verifica se a senha plain corresponde ao hash"""
+    try:
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    except Exception:
+        return False
+
+
+def get_password_hash(password: str) -> str:
+    """Gera hash da senha"""
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
